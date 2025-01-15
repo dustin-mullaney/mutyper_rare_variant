@@ -273,9 +273,9 @@ def spectra(args):
             DP = variant.format('AD').sum(axis=1)
 
             # Set counts to 1 for any sample that has AD >= min_AD
-            counts = (AD >= (min_AD)).astype(int)
+            counts = (AD >= (args.min_AD)).astype(int)
             # Set counts back to 0 if that sample doesn't have sufficient depth
-            counts[DP < min_DP] = 0
+            counts[DP < args.min_DP] = 0
 
             spectra_data[variant.INFO["mutation_type"]] += counts
 
@@ -515,9 +515,5 @@ def main(arg_list=None):
     args = get_parser().parse_args(arg_list)
     log_format = "[%(levelname)s][Time elapsed (ms) %(relativeCreated)d]: %(message)s"
     log_level = logging.DEBUG if args.verbose else logging.WARNING
-    logging.basicConfig(format=log_format, level=log_level)
-    # if args.rare:
-        # min_DP = args.min_DP
-        # min_AD = args.min_AD
-        
+    logging.basicConfig(format=log_format, level=log_level)  
     args.func(args)
