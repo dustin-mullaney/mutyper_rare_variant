@@ -263,6 +263,30 @@ def spectra(args):
             print(spectra.to_csv(sep="\t", index=False))
         except BrokenPipeError:
             pass
+    
+    elif args.rare:
+        spectra_data = defaultdict(lambda: np.zeros_like(vcf.samples, dtype=int))
+
+        for variant in iterate_with_ambiguity_warning():
+            counter += 1
+
+            AD = variant.format('AD')[:,1]
+            DP = variant.format('AD').sum(axis=1)
+
+            # Set counts to 1 for any sample that has AD >= min_AD
+            counts = (AD >= (min_AD)).astype(int)
+            # Set counts back to 0 if that sample doesn't have sufficient depth
+            counts[DP < min_DP] = 0
+
+            spectra_data[variant.INFO["mutation_type"]] += counts
+
+        spectra = pd.DataFrame(spectra_data, vcf.samples).reindex(
+            sorted(spectra_data), axis="columns"
+        )
+        try:
+            print(spectra.to_csv(sep="\t", index=True, index_label="sample"))
+        except BrokenPipeError:
+            pass
 
     else:
         spectra_data = defaultdict(lambda: np.zeros_like(vcf.samples, dtype=int))
@@ -458,6 +482,30 @@ def get_parser():
         action="store_true",
         help="randomly assign mutation to a single haplotype",
     )
+    parser_spectra.add_argument(
+        "--rare",
+        action="store_true",
+        help="run in rare variant mode",
+    )
+    
+    parser_spectra.add_argument(
+        "-d",
+        "--min_DP",
+        type=int,
+        default=10
+        help="Only used with --rare. Minimum depth (DP) within a sample to consider a variant. Default is 10.",
+    )
+    min_DP = args.min_DP
+    
+    parser_spectra.add_argument(
+        "-a"
+        "--min_AD",
+        type=int,
+        default=1
+        help="Only used with --rare. Minimum reads supporting alt allele to consider a variant. Default is 1",
+    )
+    min_AD = args.min_AD
+    
     parser_spectra.set_defaults(func=spectra)
 
     # arguments specific to ksfs subcommand
