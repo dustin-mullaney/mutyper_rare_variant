@@ -492,7 +492,7 @@ def get_parser():
         "-d",
         "--min_DP",
         type=int,
-        default=10
+        default=10,
         help="Only used with --rare. Minimum depth (DP) within a sample to consider a variant. Default is 10.",
     )
     min_DP = args.min_DP
@@ -501,7 +501,7 @@ def get_parser():
         "-a"
         "--min_AD",
         type=int,
-        default=1
+        default=1,
         help="Only used with --rare. Minimum reads supporting alt allele to consider a variant. Default is 1",
     )
     min_AD = args.min_AD
