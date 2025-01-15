@@ -496,7 +496,7 @@ def get_parser():
     )
     
     parser_spectra.add_argument(
-        "-a"
+        "-a",
         "--min_AD",
         type=int,
         default=1,
