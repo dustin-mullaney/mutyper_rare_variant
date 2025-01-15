@@ -516,7 +516,7 @@ def main(arg_list=None):
     log_format = "[%(levelname)s][Time elapsed (ms) %(relativeCreated)d]: %(message)s"
     log_level = logging.DEBUG if args.verbose else logging.WARNING
     logging.basicConfig(format=log_format, level=log_level)
-    args.func(args)
     if args.rare:
         min_AD = args.min_AD
         min_DP = args.min_DP
+    args.func(args)
