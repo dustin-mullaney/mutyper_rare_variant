@@ -268,7 +268,6 @@ def spectra(args):
         spectra_data = defaultdict(lambda: np.zeros_like(vcf.samples, dtype=int))
 
         for variant in iterate_with_ambiguity_warning():
-            counter += 1
 
             AD = variant.format('AD')[:,1]
             DP = variant.format('AD').sum(axis=1)
