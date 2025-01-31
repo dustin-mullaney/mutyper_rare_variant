@@ -420,6 +420,13 @@ def get_parser():
         "VCF/BCF with mutation_type data and stream to"
         " stdout",
     )
+    parser_sample_allele_freq = subparsers.add_parser(
+        "sample_allele_freq",
+        description="Computes histograms of allele fractions for each sample in a BCF/VCF file,"
+        "normalizing read depth to min_DP using hypergeometric projection."
+        "Streams output to stdout",
+    )
+    
     parser_ksfs = subparsers.add_parser(
         "ksfs",
         description="compute sample frequency spectrum for each "
