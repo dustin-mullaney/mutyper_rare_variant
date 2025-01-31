@@ -335,7 +335,7 @@ def ksfs(args):
     except BrokenPipeError:
         pass
 
-def sample_allele_freq(vcf_path, min_DP, min_AD):
+def sample_allele_freq(args):
     """
     Computes histograms of allele fractions for each sample in a BCF/VCF file,
     normalizing read depth to min_DP using hypergeometric projection.
