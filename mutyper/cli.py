@@ -13,6 +13,7 @@ from Bio.Seq import reverse_complement
 import logging
 import gzip
 from mutyper import ancestor
+from scipy.stats import hypergeom
 
 
 def setup_ancestor(args):
