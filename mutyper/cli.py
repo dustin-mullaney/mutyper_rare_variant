@@ -491,7 +491,7 @@ def get_parser():
         )
 
     # subcommands that require VCF input
-    for sub_parser in (parser_ancestor, parser_variants, parser_spectra, parser_ksfs):
+    for sub_parser in (parser_ancestor, parser_variants, parser_spectra, parser_ksfs, parser_sample_allele_freq):
         sub_parser.add_argument(
             "vcf",
             type=str,
