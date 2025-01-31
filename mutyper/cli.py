@@ -335,6 +335,59 @@ def ksfs(args):
     except BrokenPipeError:
         pass
 
+def sample_allele_freq(vcf_path, min_DP, min_AD):
+    """
+    Computes histograms of allele fractions for each sample in a BCF/VCF file,
+    normalizing read depth to min_DP using hypergeometric projection.
+
+    """
+    vcf = cyvcf2.VCF(args.vcf, strict_gt=True)
+    min_DP = args.min_DP
+    
+    bin_edges = np.linspace(0, 1, min_DP + 1)  # Bin edges
+    histograms = {sample: np.zeros(min_DP, dtype=int) for sample in samples}
+    
+    for variant in vcf:
+        for i, sample in enumerate(samples):
+            AD = variant.format('AD')[i]
+            if len(AD) < 2:
+                continue
+                
+            DP = AD.sum()
+
+            if DP < min_DP:
+                continue  # Skip low-coverage samples
+
+            ref_count, alt_count = AD[:2]  # First two values (should be biallelic)
+            
+            # Ignore variants with fewer reads supporting alt allele than min_AD
+            if alt_count < min_AD:
+                continue
+            
+            # If DP > min_DP, project down using hypergeometric distribution
+            if DP > min_DP:
+                projected_alt = hypergeom.rvs(DP, alt_count, min_DP)
+            else:
+                projected_alt = alt_count  # Use raw count if DP == min_DP
+
+            # Compute fraction of alternate reads
+            alt_fraction = projected_alt / min_DP
+            
+            # Ignore variants with 100% frequency- likely germline
+            if alt_fraction == 1:
+                continue 
+
+            # Bin the value using numpy.histogram
+            bin_counts, _ = np.histogram([alt_fraction], bins=bin_edges)
+            histograms[sample] += bin_counts  # Update histogram counts
+
+    histograms = pd.DataFrame.from_dict(histograms, orient="index", columns=[f"bin_{i}" for i in range(min_DP)])
+
+    try:
+        print(histograms.to_csv(sep="\t", index=True, index_label="sample"))
+    except BrokenPipeError:
+        pass
+
 
 def get_parser():
     parser = argparse.ArgumentParser(
