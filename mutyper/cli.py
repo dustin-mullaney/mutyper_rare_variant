@@ -342,6 +342,7 @@ def sample_allele_freq(args):
 
     """
     vcf = cyvcf2.VCF(args.vcf, strict_gt=True)
+    samples = vcf.samples
     min_DP = args.min_DP
     
     bin_edges = np.linspace(0, 1, min_DP + 1)  # Bin edges
