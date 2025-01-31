@@ -569,6 +569,24 @@ def get_parser():
 
     # arguments specific to ksfs subcommand
     parser_ksfs.set_defaults(func=ksfs)
+    
+    # arguments specific to sample_allele_freq subcommand
+    parser_sample_allele_freq.add_argument(
+        "-d",
+        "--min_DP",
+        type=int,
+        default=10,
+        help="Minimum depth (DP) within a sample to consider a variant. Default is 10.",
+    )
+    
+    parser_sample_allele_freq.add_argument(
+        "-a",
+        "--min_AD",
+        type=int,
+        default=1,
+        help="Minimum reads supporting alt allele to consider a variant. Default is 1",
+    )
+    parser_sample_allele_freq.set_defaults(func=sample_allele_freq)
 
     return parser
 
