@@ -420,12 +420,6 @@ def get_parser():
         "VCF/BCF with mutation_type data and stream to"
         " stdout",
     )
-    parser_sample_allele_freq = subparsers.add_parser(
-        "sample_allele_freq",
-        description="Computes histograms of allele fractions for each sample in a BCF/VCF file,"
-        "normalizing read depth to min_DP using hypergeometric projection."
-        "Streams output to stdout",
-    )
     
     parser_ksfs = subparsers.add_parser(
         "ksfs",
@@ -435,6 +429,13 @@ def get_parser():
         "subcommand ) and stream to stdout",
     )
 
+    parser_sample_allele_freq = subparsers.add_parser(
+        "sample_allele_freq",
+        description="Computes histograms of allele fractions for each sample in a BCF/VCF file,"
+        "normalizing read depth to min_DP using hypergeometric projection."
+        "Streams output to stdout",
+    )
+
     # arguments for all subparsers
     for sub_parser in (
         parser_ancestor,
@@ -442,6 +443,7 @@ def get_parser():
         parser_targets,
         parser_spectra,
         parser_ksfs,
+        parser_sample_allele_freq,
     ):
         sub_parser.add_argument(
             "--verbose", help="increase logging verbosity", action="store_true"
