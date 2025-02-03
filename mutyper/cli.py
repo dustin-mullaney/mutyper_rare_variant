@@ -347,7 +347,10 @@ def sample_allele_freq(args):
     min_DP = args.min_DP
     min_AD = args.min_AD
     
-    bin_edges = np.linspace(0, 1, min_DP + 1)  # Bin edges
+    # bin_edges = np.linspace(0, 1, min_DP + 1)  # Bin edges
+    ## bin edges need to be slighly offset for np.digitize:
+    bin_edges = np.linspace(-1e-6, 1, min_DP + 1)
+    
     histograms = {sample: np.zeros(min_DP, dtype=int) for sample in samples}
     
     for variant in vcf:
@@ -380,9 +383,16 @@ def sample_allele_freq(args):
             if alt_fraction == 1:
                 continue 
 
-            # Bin the value using numpy.histogram
-            bin_counts, _ = np.histogram([alt_fraction], bins=bin_edges)
-            histograms[sample] += bin_counts  # Update histogram counts
+            ## Bin the value using numpy.histogram:
+            # bin_counts, _ = np.histogram([alt_fraction], bins=bin_edges)
+            # histograms[sample] += bin_counts  # Update histogram counts
+            
+            ## Find the closest bin with np.digitize:
+            bin_idx = np.digitize([alt_fraction], bin_edges) - 1
+            bin_idx = min(bin_idx[0], min_DP - 1)  # Ensure bin index is within range
+            
+            
+            histograms[sample][bin_idx] += 1  # Increment correct bin
 
     histograms = pd.DataFrame.from_dict(histograms, orient="index", columns=[f"bin_{i}" for i in range(min_DP)])
 
