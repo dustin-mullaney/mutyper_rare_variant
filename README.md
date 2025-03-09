@@ -6,10 +6,14 @@ Example:
 
 	bcftools mpileup --annotate "FORMAT/AD,FORMAT/DP" -b "${BAM_LIST}" -f "${GENOME}" | bcftools call --thread 8 -mA -Ob -o "${OUT_FILE}"
 	bcftools norm -m - "${OUT_FILE}" -Ob -o temp.bcf && mv temp.bcf "${OUT_FILE}"
+	
+## Utilities and example usage:
 
-### `mutyper variants` and `mutyper spectra` with `--rare`
+### `mutyper spectra` with `--rare`
 
 ### `sample_allele_freq()`
+
+---
 
 ![](docs/_static/logo.png)
 
