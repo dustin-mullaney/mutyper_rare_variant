@@ -216,6 +216,77 @@ def variants(args):
     if num_vars == 0:
         logging.warning("No variants processed. Check that input vcf is not empty.")
 
+def variants_multi(args):
+    """Subroutine for variants subcommand."""
+    ancestor = setup_ancestor(args)
+
+    vcf = cyvcf2.VCF(args.vcf)
+    vcf.add_info_to_header(
+        {
+            "ID": "mutation_type",
+            "Description": f"ancestral {args.k}-mer mutation type",
+            "Type": "Character",
+            "Number": "A",
+        }
+    )
+    print(vcf.raw_header, end="")
+    num_vars = 0
+    valid_ploidy = set([1, 2])
+    for variant in vcf:
+        num_vars += 1
+        # biallelic snps only
+        if not (variant.is_snp and len(variant.ALT) == 1):
+            continue
+
+        if variant.ploidy not in valid_ploidy:
+            raise ValueError(
+                f"invalid ploidy {variant.ploidy}, diploids and haploids only"
+            )
+
+        # mutation type as ancestral kmer and derived kmer
+        anc_kmer, der_kmer = ancestor.mutation_type(
+            variant.CHROM, variant.start, variant.REF, variant.ALT[0]
+        )
+        if anc_kmer is None or der_kmer is None:
+            continue
+        mutation_type = f"{anc_kmer}>{der_kmer}"
+        variant.INFO["mutation_type"] = mutation_type
+
+        # checks that all genotype elements are from the set of {-1,0,1}
+        # each element in the last column is a 0,1 indicator for phasing status
+        genotype_array = variant.genotype.array()
+        unique_gts = set(np.unique(genotype_array[:, :-1]))
+        if not unique_gts <= set([-1, 0, 1]):
+            raise ValueError(f"invalid genotypes {unique_gts - set([-1,0,1])}")
+
+        # ancestral allele
+        AA = ancestor[variant.CHROM][variant.start].seq
+
+        # polarize genotypes (and associated INFO) if alternative allele is
+        # ancestral
+        if variant.ALT[0] == AA:
+            variant.INFO["AC"] = variant.INFO["AN"] - variant.INFO["AC"]
+            variant.INFO["AF"] = variant.INFO["AC"] / variant.INFO["AN"]
+
+            # cyvcf2 docs say we need to reassign genotypes like this for the
+            # change to propagate (can't just update indexwise)
+            genotype_array[:, :-1] = np.select(
+                [genotype_array[:, :-1] == state for state in [-1, 0, 1]], [-1, 1, 0]
+            )
+            variant.genotypes = genotype_array
+        elif not variant.REF == AA:
+            raise ValueError(
+                f"ancestral allele {AA} is not equal to "
+                f"reference {variant.REF} or alternative "
+                f"{variant.ALT[0]}"
+            )
+        # set REF to ancestral allele and ALT to derived allele
+        variant.REF = anc_kmer[ancestor.target]
+        variant.ALT = der_kmer[ancestor.target]
+        print(str(variant), end="")
+
+    if num_vars == 0:
+        logging.warning("No variants processed. Check that input vcf is not empty.")
 
 def targets(args):
     """Subroutine for targets subcommand."""
