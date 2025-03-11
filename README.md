@@ -1,5 +1,9 @@
 # This modified version of mutyper adds utilities for characterizing rare somatic mutations to the CLI. 
 
+### install:
+pip install git+https://github.com/dustin-mullaney/mutyper_rare_variant
+
+### Usage:
 `mutyper_rare_variant` was designed to work with bcf/vcf files generated with `bcftools` multialleic caller. It requires the AD and DP format fields. 
 Before running `mutyper_rare_variant` you should standard your vcf/bcf to biallelic format using `bcftools norm`.
 Example:
